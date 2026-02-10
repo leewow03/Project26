@@ -1,9 +1,22 @@
-from app.services.Crm import app
 import os
+from flask import Flask, render_template
+from app.services.BoardService import BoardF
+from app.services.CrmService import CrmF
 
-# [핵심] Flask에게 templates 폴더가 어디 있는지 명확하게 알려줍니다.
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('auth/main.html')
+
+app.register_blueprint(BoardF)
+app.register_blueprint(CrmF)
+
+app.secret_key = 'secret_key'
 app.template_folder = os.path.abspath("templates")
 app.static_folder = os.path.abspath("static")
+
+
 
 if __name__ == '__main__':
     # 여기서 전원을 켭니다!
