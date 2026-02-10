@@ -1,6 +1,5 @@
 # Project26
-
-"""
+```
    운동용/
 │
 ├── run.py                # 1. 실행 스위치 (딱 서버만 켜는 코드)
@@ -30,5 +29,4 @@
                             join.html
                             login.html
                             main.html
-
-"""
+```
