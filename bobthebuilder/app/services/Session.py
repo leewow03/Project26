@@ -22,8 +22,8 @@ class Session:
 
         return pymysql.connect(
             host='localhost',
-            user='root',
-            password='Mbc320!!',  # 본인의 비밀번호로 변경
+            user='bob',
+            password='1234',  # 본인의 비밀번호로 변경
             db='bob',
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor

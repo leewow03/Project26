@@ -1,153 +1,76 @@
-from flask import render_template, request, redirect, url_for, session,Blueprint
 from app.services.Session import Session
 
-CrmF = Blueprint('crm', __name__)
 
-@CrmF.route('/login', methods=['GET','POST']) # http://localhost:5000/login
-    # methods는 웹에 동작을 관여한다.
-    # GET : URL 주소로 데이터를 처리(보안상 좋지 않음, 빠름)
-    # POST : BODY영역에서 데이터를 철리(보안상 좋음, 대용량에서 많이 사용함)
-    # 대부분 처음에 화면(HTML렌더)을 요청할 때는 GET 방식으로 처리
-    # 화면에 있는 내용을 백엔드로 전달할 때는 POST 방식으로 처리
-def login():
-    if request.method == 'GET': # 처음접속하면 GET방식으로 화면 출력용
-        return render_template('auth/login.html')
-        # get방식으로 요청하면 login.html 화면이 나옴
+class CrmService:
 
-    # login.html에서 action="/login" method="POST"처리용 코드
-    # login.html에서 넘어온 폼 데이터는 uid / upw
-    uid = request.form.get('uid') # 요청한  폼내용을 가져옴
-    upw = request.form.get('upw') # request  form  get
-    # print("/login에서 넘어온 폼 데이터 출력 테스트 ")
-    # print(uid, upw)
-    # print("===================================")
+    @staticmethod
+    def login_user(uid, upw):
+        conn = Session.get_connection()
+        try:
+            with conn.cursor() as cursor:
+                sql = "SELECT id, name, uid, role FROM Member WHERE uid = %s AND password = %s"
+                cursor.execute(sql, (uid, upw))
+                return cursor.fetchone()
+        finally:
+            conn.close()
 
-    conn = Session.get_connection() # 교사용 db에 접속용 객체
-    try: # 예외발생 가능성 있음
-        with conn.cursor() as cursor: # db에 커서객체 사용
-            # 1회원 정보 조회
-            sql = "SELECT id, name, uid, role  \
-            FROM Member WHERE uid = %s AND password = %s"
-            #                  uid가 동일 &  pwd가 동일
-            #    id, name, uid, role 가져온다.
-            cursor.execute(sql, (uid, upw)) # 쿼리문 실행
-            user = cursor.fetchone() # 쿼리 결과 1개를 가져와 user 변수에 넣음
+    @staticmethod
+    def check_duplicate_uid(uid):
+        conn = Session.get_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id FROM Member WHERE uid = %s", (uid,))
+                return cursor.fetchone()
+        finally:
+            conn.close()
 
-            if user:
-                # 찾은 계정이 있으면 브라우져의 세션영역에 보관한다.
-                session['user_id'] = user['id'] # 계정일련번호(회원번호)
-                session['user_name'] = user['name'] # 계정이름
-                session['user_uid'] = user['uid']  # 계정로그인명
-                session['user_role'] = user['role']  # 계정권한
-                # 세션에 저장 완료
-                # 브라우저에서 f12번 누르고 애플리케이션 탭에서 쿠키 항복에 가면 session객체가 보임
-                # 이것을 삭제하면 로그아웃 처리 됨s
-                return redirect(url_for('index'))
-                # 처리후 이동하는 경로 http://localhost:/index로 감(get 메서드 방식)
-            else :
-                # 찾은 계정이 없다.
-                return "<script>alert('아이디나 비번이 틀렸습니다.');history.back();</script>"
-            #                  경고창발생                          뒤로가기
-    finally:
-        conn.close() # db 연결 종료
+    @staticmethod
+    def register_member(uid, password, name):
+        conn = Session.get_connection()
+        try:
+            with conn.cursor() as cursor:
+                sql = "INSERT INTO Member (uid, password, name) VALUES (%s, %s, %s)"
+                cursor.execute(sql, (uid, password, name))
+                conn.commit()
+                return True
+        except Exception as e:
+            print(f"회원가입 에러: {e}")
+            return False
+        finally:
+            conn.close()
 
-
-@CrmF.route('/logout') # 기본동작이 get방식이라 , methods=['GET'] 생략가능
-def logout():
-    session.clear()  # 세션 비우기
-    return redirect(url_for('crm.login'))# http://localhost:5000/login (get방식)
-
-@CrmF.route('/join', methods=['GET','POST']) # 회원가입용 함수
-def join(): # http://localhost:5000/ get메서드(화면출력) post(화면폼처리용)
-    if request.method == 'GET':
-        return render_template('auth/join.html') # 로그인화면용 프론트로 보냄
-
-    # POST 메서드 인 경우 (폼으로 데이터가 넘어올때 처리)
-
-    uid = request.form.get('uid')
-    password = request.form.get('password')
-    name = request.form.get('name') # 폼에서 넘어온 값을 변수에 넣음
-
-    conn = Session.get_connection() # db에 연결
-    try: # 예외발생 가능성이 있는 코드
-        with conn.cursor() as cursor:
-            # 아이디 중복 확인
-            cursor.execute("SELECT id FROM Member WHERE uid = %s", (uid,))
-            if cursor.fetchone():
-                return "<script>alert('이미 존재하는 아이디입니다.'); history.back();</script>"
-
-            # 회원 정보 저장 (role, active는 기본값이 들어감)
-            sql = "INSERT INTO Member (uid, password, name) VALUES (%s, %s, %s)"
-            cursor.execute(sql, (uid, password, name))
-            conn.commit()
-
-            return "<script>alert('회원가입이 완료되었습니다!'); location.href='/login';</script>"
-    except Exception as e: # 예외발생시 실행문
-        print(f"회원가입 에러: {e}")
-        return "가입 중 오류가 발생했습니다. /n join()메서드를 확인하세요!!!"
-
-    finally:   # 항상 실행문
-        conn.close()
-
-@CrmF.route('/member/edit', methods=['GET','POST'])
-def member_edit():
-    if 'user_id' not in session: #세션에 user_id가 없으면
-        return redirect(url_for('crm.login')) #로그인 경로로 보냄
-
-    # 있으면 db 연결 시작!
-    conn = Session.get_connection()
-    try:
-        with conn.cursor() as cursor:
-            if request.method == 'GET':
-            # 기존 정보 불러오기
-                cursor.execute("SELECT * FROM Member WHERE id = %s", (session['user_id'],))
+    @staticmethod
+    def get_member_info(member_id):
+        conn = Session.get_connection()
+        try:
+            with conn.cursor() as cursor:
+                # 회원 정보 조회
+                cursor.execute("SELECT * FROM Member WHERE id = %s", (member_id,))
                 user_info = cursor.fetchone()
-                return render_template('member_edit.html', user = user_info)
-                #                                         ★get요청시 페이지      객체 전달용 코드★
-            new_name = request.form.get('name')
-            new_pw = request.form.get('password')
-            # POST 요청: 정보 업데이트
-            if new_pw:  # 비밀번호 입력 시에만 변경
-                sql = "UPDATE Member SET password = %s WHERE id = %s"
-                cursor.execute(sql, (new_pw, session['user_id']))
-            else:  # 이름만 변경
-                sql = "UPDATE Member SET name = %s WHERE id = %s"
-                cursor.execute(sql, (new_name, session['user_id']))
 
-            conn.commit()
-            session['user_name'] = new_name  # 세션 이름 정보도 갱신
-            return "<script>alert('정보가 수정되었습니다.'); location.href='/crm /mypage';</script>"
+                # 게시글 개수 조회 (보너스: 마이페이지용)
+                cursor.execute("SELECT COUNT(*) as board_count FROM boards WHERE member_id = %s", (member_id,))
+                board_result = cursor.fetchone()
 
-    except Exception as e:
-        print(f"회원수정 에러: {e}")
-        return "가입 중 오류가 발생했습니다. /n member_edit()메서드를 확인하세요!!!"
+                return user_info, board_result['board_count'] if board_result else 0
+        finally:
+            conn.close()
 
-    finally:
-        conn.close()
-
-
-@CrmF.route('/mypage')
-def mypage():
-    if 'user_id' not in session: #로그인상태인지 확인
-        return redirect(url_for('crm.login')) #로그인아니면 htp://localhost:5000/login으로 보냄
-
-    conn = Session. get_connection() #db연결
-    try:
-        with conn.cursor() as cursor:
-        # 1. 내 상세 정보 조회
-            cursor.execute ("SELECT * FROM Member WHERE id = %s", (session['user_id' ],))
-            # 로그인한 정보를 가지고 db에서 찾아옴
-            user_info = cursor.fetchone() #찾아온 값 1개를 user_info에 담음(dict)
-
-            # 2. 내가 쓴 게시글 개수 조회 (작성하신 boards 테이블 활용)
-            cursor.execute("SELECT COUNT(*) as board_count FROM boards WHERE member_id =%s", (session['user_id'],))
-            #                                                   boards 테이블에 조건 member_id 값을 가지고 찾아옴
-            #                                           개수를 세어 fetchone()넣음 -> board_count 이름으로 개수를 가지고 있음
-            board_count = cursor.fetchone()['board_count']
-
-            return render_template('mypage.html', user=user_info, board_count=board_count)
-            # 결과를 리턴                                mypage.html에게 user 객체와 board_count객체를 담아 보냄
-            # 프론트에서 사용할려면{{user.???}}{{board_count}}
-    finally:
-        conn.close()
-
+    @staticmethod
+    def update_member(member_id, name, password=None):
+        conn = Session.get_connection()
+        try:
+            with conn.cursor() as cursor:
+                if password:
+                    sql = "UPDATE Member SET name = %s, password = %s WHERE id = %s"
+                    cursor.execute(sql, (name, password, member_id))
+                else:
+                    sql = "UPDATE Member SET name = %s WHERE id = %s"
+                    cursor.execute(sql, (name, member_id))
+                conn.commit()
+                return True
+        except Exception as e:
+            print(f"수정 에러: {e}")
+            return False
+        finally:
+            conn.close()

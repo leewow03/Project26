@@ -1,0 +1,65 @@
+{% extends 'layout/layout.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 fw-bold">내 정보</h4>
+                        <span class="badge rounded-pill bg-success px-3 py-2">
+                             {{ user.role.upper() if user.role else '일반회원' }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="display-4 text-muted mb-2">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <h3 class="fw-bold">{{ user.name }} 님</h3>
+                        <p class="text-muted small">ID: {{ user.uid }}</p>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="fw-bold mb-3"><i class="bi bi-activity text-info"></i> 신체 정보 (PI)</h5>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded shadow-sm border-start border-info border-4">
+                                <small class="text-muted d-block">신장 (Height)</small>
+                                <span class="h4 fw-bold text-dark">{{ user.height or '-' }}</span> <small>cm</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded shadow-sm border-start border-info border-4">
+                                <small class="text-muted d-block">체중 (Weight)</small>
+                                <span class="h4 fw-bold text-dark">{{ user.weight or '-' }}</span> <small>kg</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded shadow-sm border-start border-danger border-4">
+                                <small class="text-muted d-block">체지방 (Body Fat)</small>
+                                <span class="h4 fw-bold text-danger">{{ user.body_fat or '-' }}</span> <small>%</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded shadow-sm border-start border-primary border-4">
+                                <small class="text-muted d-block">근육량 (Muscle)</small>
+                                <span class="h4 fw-bold text-primary">{{ user.muscle_mass or '-' }}</span> <small>kg</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-light border-0 text-center py-3">
+                    <a href="/member_edit" class="btn btn-outline-dark btn-sm me-2">정보 수정</a>
+                    <a href="/" class="btn btn-dark btn-sm">홈으로 돌아가기</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
