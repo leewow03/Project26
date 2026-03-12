@@ -1,4 +1,4 @@
-# Project26
+# Project26__
 ```
 ├──  run.py  # 실행 버튼만
 │
@@ -20,6 +20,7 @@
 └── templates/
 		├── auth
 		└── layout
+
 
 ```
 
