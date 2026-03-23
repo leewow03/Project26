@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>삐용 — 응급차량 식별 시스템</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/mainstyle.css">
+</head>
+<body class="{% if not session.get('user_name') %}no-scroll{% endif %}">
+
+<div class="hero-container">
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content {% if not session.get('user_name') %}logged-out-content{% endif %}">
+
+        <!-- ── 네비게이션 ── -->
+        <nav class="top-nav">
+            <a href="/" class="nav-title">
+                <span class="siren-icon"><span>◉</span><span>◉</span></span>
+                삐용
+            </a>
+            <div class="nav-right">
+                <a href="/introduce" class="nav-item">소개</a>
+                <a href="/analyze"   class="nav-item">분석</a>
+                <a href="/board"     class="nav-item">게시판</a>
+
+                {% if session.get('user_name') %}
+                <a href="/mypage"  class="nav-item">마이페이지</a>
+                <a href="/logout"  class="nav-item">로그아웃</a>
+                {% else %}
+                <a href="/login"   class="nav-item active">로그인</a>
+                <a href="/join"    class="hero-btn primary"
+                   style="min-width:auto;height:36px;padding:0 18px;font-size:0.7rem;">회원가입</a>
+                {% endif %}
+            </div>
+        </nav>
+
+        <!-- ── 히어로 타이틀 ── -->
+        {% if session.get('user_name') %}
+        <h1 class="welcome-title">{{ session['user_name'] }}<br>님 환영합니다</h1>
+        <p class="welcome-subtitle">Emergency Vehicle Identification System</p>
+        {% else %}
+        <h1 class="welcome-title">삐용<br>System</h1>
+        <p class="welcome-subtitle">공공 응급차량 AI 식별 플랫폼</p>
+        {% endif %}
+
+        <!-- ── 버튼 그룹 ── -->
+        <div class="button-group">
+            {% if session.get('user_name') %}
+            <a href="/analyze"   class="hero-btn primary">🚨 분석 시작</a>
+            <a href="/board"     class="hero-btn">게시판</a>
+            <a href="/mypage"    class="hero-btn">마이페이지</a>
+            {% else %}
+            <a href="/introduce" class="hero-btn primary">서비스 소개</a>
+            <a href="/login"     class="hero-btn">로그인</a>
+            <a href="/join"      class="hero-btn">회원가입</a>
+            {% endif %}
+        </div>
+
+        <!-- ── 로그인 상태: 최근 감지 슬라이더 + 분석 결과 카드 ── -->
+        {% if session.get('user_name') %}
+        <div class="main-container">
+
+            <!-- 슬라이더 -->
+            <div class="history-section">
+                <div class="history-slider">
+                    <div class="slider-wrapper" id="sliderWrapper">
+                        {% for item in recent_detections %}
+                        <div class="slide-item">
+                            <span class="slide-car-tag">{{ item.icon }} {{ item.label }}</span>
+                            <span style="font-size:2.2rem;">{{ item.icon }}</span>
+                            <span style="font-family:var(--font-mono);font-size:0.82rem;color:var(--text-sub);">
+                                {{ item.desc }}
+                            </span>
+                        </div>
+                        {% else %}
+                        <div class="slide-item">
+                            <span class="slide-car-tag">— 감지 이력 없음</span>
+                            <span style="font-size:2rem;">📭</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="indicator-container" id="dots"></div>
+            </div>
+
+            <!-- 최근 분석 결과 카드 -->
+            <div class="result-card">
+                <div class="result-header">최근 분석 결과</div>
+                {% if last_result %}
+                <div class="result-body" style="flex-direction:column;align-items:flex-start;">
+                    {% if last_result.image_path %}
+                    <img src="{{ last_result.image_path }}" alt="분석 이미지" class="analysis-img">
+                    {% endif %}
+                    <p class="data-label">식별 유형</p>
+                    <p class="data-value">{{ last_result.vehicle_type }}</p>
+                    <p class="data-label">신뢰도</p>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width:{{ last_result.confidence }}%"></div>
+                    </div>
+                    <p class="data-value" style="margin-top:4px;">{{ last_result.confidence }}%</p>
+                    <p class="data-label" style="margin-top:14px;">상태</p>
+                    <span class="status-tag">{{ last_result.status }}</span>
+                </div>
+                {% else %}
+                <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-family:var(--font-mono);font-size:0.8rem;">
+                    아직 분석 기록이 없습니다
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<script>
+    const wrapper = document.getElementById('sliderWrapper');
+    const dotsEl  = document.getElementById('dots');
+    if (wrapper) {
+        const items = wrapper.querySelectorAll('.slide-item');
+        let idx = 0;
+
+        // 도트 생성
+        items.forEach((_, i) => {
+            const d = document.createElement('div');
+            d.className = 'dot' + (i === 0 ? ' active' : '');
+            d.onclick = () => goTo(i);
+            dotsEl.appendChild(d);
+        });
+
+        function goTo(n) {
+            idx = n;
+            wrapper.style.transform = `translateY(-${idx * 420}px)`;
+            dotsEl.querySelectorAll('.dot').forEach((d, i) =>
+                d.classList.toggle('active', i === idx));
+        }
+
+        setInterval(() => goTo((idx + 1) % items.length), 3500);
+    }
+</script>
+</body>
+</html>

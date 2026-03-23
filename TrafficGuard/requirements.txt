@@ -1,0 +1,10 @@
+#pip install -r requirements.txt
+
+pymysql
+cryptography
+flask
+pandas
+matplotlib
+scikit-learn
+
+#tensorflow

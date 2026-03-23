@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>삐용 — 서비스 소개</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/mainstyle.css">
+    <style>
+    .page-section { max-width:1200px; margin:0 auto; padding:6rem 2rem; }
+
+    .section-label {
+        font-family: var(--font-mono);
+        font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase;
+        color: var(--red); margin-bottom: 0.6rem;
+    }
+    .section-title {
+        font-family: var(--font-display);
+        font-size: clamp(2rem, 4.5vw, 3rem);
+        letter-spacing: 3px; line-height: 1.1;
+        margin-bottom: 0.75rem; text-transform: uppercase;
+    }
+    .section-desc {
+        color: var(--text-sub); font-size: 0.92rem;
+        line-height: 1.85; max-width: 520px; margin-bottom: 3rem;
+    }
+
+    /* ── 인트로 그리드 ── */
+    .intro-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5rem; align-items: center;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 5rem;
+    }
+
+    /* ── 스캔 비주얼 ── */
+    .intro-visual {
+        position: relative; border-radius: var(--radius-md);
+        overflow: hidden; aspect-ratio: 16/10;
+        background: linear-gradient(135deg, #0a0f1a, #0d0508);
+        border: 1px solid var(--border);
+        animation: sirenFlash 2.4s ease-in-out infinite;
+    }
+    .car-scan-ui { width:100%; height:100%; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+    .car-svg { width:65%; position:relative; z-index:2; }
+    .scan-line {
+        position:absolute; left:0; right:0; height:2px;
+        background: linear-gradient(90deg, transparent, var(--red), transparent);
+        animation: scanMove 3s ease-in-out infinite; z-index:3;
+        box-shadow: 0 0 14px var(--red);
+    }
+    @keyframes scanMove {
+        0%  { top:8%;  opacity:0; } 8%  { opacity:1; }
+        92% { opacity:1; } 100% { top:92%; opacity:0; }
+    }
+    .corner { position:absolute; width:22px; height:22px; z-index:4; }
+    .corner-tl { top:8%;    left:8%;   border-top:2px solid var(--red);  border-left:2px solid var(--red); }
+    .corner-tr { top:8%;    right:8%;  border-top:2px solid var(--blue); border-right:2px solid var(--blue); }
+    .corner-bl { bottom:8%; left:8%;   border-bottom:2px solid var(--blue); border-left:2px solid var(--blue); }
+    .corner-br { bottom:8%; right:8%;  border-bottom:2px solid var(--red);  border-right:2px solid var(--red); }
+    .detect-tag {
+        position:absolute; border-radius:3px; font-family:var(--font-mono);
+        font-size:0.6rem; padding:3px 8px; font-weight:700; letter-spacing:1px;
+        z-index:5; animation: pulse 1.8s ease-in-out infinite;
+    }
+    .detect-tag.emergency { top:18%; left:52%; background:rgba(255,51,51,0.18); border:1px solid rgba(255,51,51,0.5); color:var(--red); }
+    .detect-tag.status    { bottom:22%; right:10%; background:rgba(26,143,255,0.18); border:1px solid rgba(26,143,255,0.5); color:var(--blue); }
+
+    /* ── 기능 카드 ── */
+    .feat-grid { display:grid; gap:1rem; }
+    .feat-item {
+        display:flex; align-items:flex-start; gap:1rem;
+        padding:1.2rem 1.4rem;
+        background:var(--bg-glass); border:1px solid var(--border);
+        border-radius:var(--radius-md);
+        transition: border-color .2s, transform .2s;
+    }
+    .feat-item:hover { border-color:rgba(255,51,51,0.3); transform:translateX(5px); }
+    .feat-icon {
+        width:40px; height:40px; border-radius:10px;
+        background:var(--red-dim); border:1px solid rgba(255,51,51,0.2);
+        display:flex; align-items:center; justify-content:center; font-size:1.15rem; flex-shrink:0;
+    }
+    .feat-item h4 { font-size:0.92rem; font-weight:700; margin-bottom:.2rem; }
+    .feat-item p  { font-size:0.8rem; color:var(--text-sub); line-height:1.6; }
+
+    /* ── 흐름 카드 ── */
+    .flow-section { padding-top:5rem; border-bottom:1px solid var(--border); padding-bottom:5rem; }
+    .flow-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; }
+    .flow-card {
+        background:var(--bg-glass); border:1px solid var(--border);
+        border-radius:var(--radius-md); padding:1.75rem;
+        position:relative; transition: border-color .2s;
+    }
+    .flow-card:hover { border-color:rgba(255,51,51,0.3); }
+    .flow-num {
+        font-family:var(--font-display); font-size:3rem; letter-spacing:2px;
+        color:var(--red); opacity:0.25; line-height:1;
+        margin-bottom:.5rem;
+    }
+    .flow-card h4 { font-size:0.95rem; font-weight:700; margin-bottom:.4rem; }
+    .flow-card p  { font-size:0.82rem; color:var(--text-sub); line-height:1.7; }
+
+    /* ── CTA ── */
+    .cta-section {
+        text-align:center; padding:5rem 2rem;
+        border-bottom:1px solid var(--border);
+    }
+    .cta-section h2 { font-family:var(--font-display); font-size:2.5rem; letter-spacing:3px; margin-bottom:1rem; }
+    .cta-section p  { color:var(--text-sub); margin-bottom:2rem; }
+    .cta-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+
+    .page-footer {
+        text-align:center; padding:2rem;
+        border-top:1px solid var(--border);
+        font-family:var(--font-mono); font-size:0.68rem;
+        letter-spacing:2px; text-transform:uppercase; color:var(--text-muted);
+    }
+
+    @media (max-width:768px) {
+        .intro-grid { grid-template-columns:1fr; gap:2.5rem; }
+        .flow-cards { grid-template-columns:1fr; }
+    }
+    </style>
+</head>
+<body>
+
+<!-- ── 네비게이션 ── -->
+<nav class="top-nav">
+    <a href="/" class="nav-title">
+        <span class="siren-icon"><span>◉</span><span>◉</span></span>삐용
+    </a>
+    <div class="nav-right">
+        <a href="/introduce" class="nav-item active">소개</a>
+        <a href="/analyze"   class="nav-item">분석</a>
+        <a href="/board"     class="nav-item">게시판</a>
+        {% if session.get('user_name') %}
+        <a href="/mypage" class="nav-item">마이페이지</a>
+        <a href="/logout" class="nav-item">로그아웃</a>
+        {% else %}
+        <a href="/login" class="nav-item">로그인</a>
+        <a href="/join"  class="hero-btn primary" style="min-width:auto;height:36px;padding:0 18px;font-size:0.7rem;">회원가입</a>
+        {% endif %}
+    </div>
+</nav>
+
+<!-- ── 인트로 ── -->
+<section class="page-section">
+    <div class="intro-grid">
+        <div>
+            <p class="section-label">About System</p>
+            <h2 class="section-title">응급차량을<br>AI가 식별합니다</h2>
+            <p class="section-desc">
+                CCTV 또는 블랙박스 영상에서 구급차·소방차·경찰차를
+                실시간으로 탐지하고, 감지 즉시 관제센터와 주변 운전자에게
+                알람을 전송하는 공공 안전 AI 플랫폼입니다.
+            </p>
+            <div class="feat-grid">
+                <div class="feat-item">
+                    <div class="feat-icon">🚨</div>
+                    <div>
+                        <h4>응급차량 즉시 식별</h4>
+                        <p>구급차·소방차·경찰차를 YOLO11m 모델이 실시간으로 분류합니다.</p>
+                    </div>
+                </div>
+                <div class="feat-item">
+                    <div class="feat-icon">📡</div>
+                    <div>
+                        <h4>감지 즉시 알람 발송</h4>
+                        <p>confidence 0.7 이상 감지 시 관제센터와 운전자 앱에 즉시 알람을 보냅니다.</p>
+                    </div>
+                </div>
+                <div class="feat-item">
+                    <div class="feat-icon">📋</div>
+                    <div>
+                        <h4>감지 이력 통합 관리</h4>
+                        <p>CCTV·블랙박스 모든 감지 이력을 하나의 게시판에서 조회합니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="intro-visual">
+            <div class="car-scan-ui">
+                <svg class="car-svg" viewBox="0 0 240 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="20" y="50" width="200" height="42" rx="6" fill="#0d1520" stroke="#1e3040" stroke-width="1.5"/>
+                    <rect x="38" y="22" width="150" height="28" rx="4" fill="#0e1e30" stroke="#1e3040" stroke-width="1.5"/>
+                    <rect x="85" y="14" width="70" height="10" rx="3" fill="#1a0505" stroke="#ff3333" stroke-width="1"/>
+                    <rect x="88" y="16" width="14" height="6" rx="1" fill="#ff3333" opacity="0.9"/>
+                    <rect x="113" y="16" width="14" height="6" rx="1" fill="#1a8fff" opacity="0.9"/>
+                    <rect x="138" y="16" width="14" height="6" rx="1" fill="#ff3333" opacity="0.9"/>
+                    <rect x="44" y="26" width="32" height="20" rx="2" fill="#081520" stroke="#0a3050" stroke-width="1"/>
+                    <rect x="82" y="26" width="32" height="20" rx="2" fill="#081520" stroke="#0a3050" stroke-width="1"/>
+                    <rect x="120" y="26" width="32" height="20" rx="2" fill="#081520" stroke="#0a3050" stroke-width="1"/>
+                    <rect x="158" y="28" width="24" height="16" rx="2" fill="#0d1520" stroke="#ff3333" stroke-width="1"/>
+                    <rect x="168" y="30" width="4"  height="12" rx="1" fill="#ff3333" opacity="0.8"/>
+                    <rect x="162" y="34" width="16" height="4"  rx="1" fill="#ff3333" opacity="0.8"/>
+                    <rect x="20"  y="57" width="18" height="10" rx="2" fill="#ff3333" opacity="0.75"/>
+                    <rect x="202" y="57" width="18" height="10" rx="2" fill="#ffdddd" opacity="0.5"/>
+                    <circle cx="68"  cy="95" r="13" fill="#080e18" stroke="#1e3040" stroke-width="1.5"/>
+                    <circle cx="68"  cy="95" r="7"  fill="#0d1520" stroke="#2a3a50" stroke-width="1"/>
+                    <circle cx="172" cy="95" r="13" fill="#080e18" stroke="#1e3040" stroke-width="1.5"/>
+                    <circle cx="172" cy="95" r="7"  fill="#0d1520" stroke="#2a3a50" stroke-width="1"/>
+                </svg>
+                <div class="scan-line"></div>
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+                <div class="detect-tag emergency">🚨 EMERGENCY DETECTED</div>
+                <div class="detect-tag status">✓ ALERT SENT</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── 동작 흐름 ── -->
+<section class="page-section flow-section" style="padding-top:0;">
+    <p class="section-label">How It Works</p>
+    <h2 class="section-title">동작 흐름</h2>
+    <p class="section-desc">업로드부터 알람까지 3단계로 처리됩니다.</p>
+
+    <div class="flow-cards">
+        <div class="flow-card">
+            <div class="flow-num">01</div>
+            <h4>영상 입력</h4>
+            <p>CCTV RTSP 스트림 또는 블랙박스 영상 파일을 시스템에 입력합니다. 실시간·업로드 모두 지원합니다.</p>
+        </div>
+        <div class="flow-card">
+            <div class="flow-num">02</div>
+            <h4>AI 탐지</h4>
+            <p>YOLO11m 파인튜닝 모델이 프레임마다 응급차량을 탐지하고 신뢰도를 계산합니다. conf ≥ 0.7 시 트리거.</p>
+        </div>
+        <div class="flow-card">
+            <div class="flow-num">03</div>
+            <h4>즉시 알람</h4>
+            <p>관제센터 대시보드에 WebSocket 실시간 알람이 전송되고, 운전자 앱 푸시 알림이 발송됩니다.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ── CTA ── -->
+<div class="cta-section">
+    <h2 class="section-title" style="font-family:var(--font-display);font-size:2.2rem;letter-spacing:3px;">
+        지금 바로 시작하세요
+    </h2>
+    <p class="section-desc" style="margin:0 auto 2rem;text-align:center;">
+        회원가입 후 영상을 업로드하면 즉시 분석이 시작됩니다.
+    </p>
+    <div class="cta-btns">
+        <a href="/join"    class="hero-btn primary">회원가입</a>
+        <a href="/analyze" class="hero-btn">분석 시작</a>
+    </div>
+</div>
+
+<footer class="page-footer">
+    © 2026 삐용 — Emergency Vehicle Identification System · All rights reserved.
+</footer>
+
+<script>
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; }
+        });
+    }, { threshold: 0.08 });
+
+    document.querySelectorAll('.feat-item, .flow-card').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(16px)';
+        el.style.transition = 'opacity .5s ease, transform .5s ease';
+        io.observe(el);
+    });
+</script>
+</body>
+</html>
